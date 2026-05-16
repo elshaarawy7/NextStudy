@@ -1,17 +1,25 @@
-# nex_study
+﻿# NexStudy
 
-A new Flutter project.
+NexStudy is an AI-powered study companion for students. This Flutter MVP ships with a polished mobile UI, clean architecture, BLoC state management, PDF upload and viewing, AI-inspired analysis tabs, quiz generation, flashcards, and lecture chat.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+- Email-style sign in and registration experience backed by a mock-friendly auth layer.
+- Upload PDF lectures and extract their text locally.
+- Generate student-friendly summary, key points, steps, quiz questions, and flashcards.
+- Chat with the lecture content using a contextual study assistant flow.
+- Ready-to-swap Firebase and API repository abstractions.
 
-A few resources to get you started if this is your first Flutter project:
+## Stack
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+- Flutter stable
+- `flutter_bloc`
+- Firebase packages wired behind repository interfaces
+- `dio`
+- `file_picker`
+- `syncfusion_flutter_pdfviewer`
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Notes
+
+- The current MVP runs with mock-first services so it works without Firebase or API credentials.
+- To enable live services later, update [`lib/src/core/config/app_config.dart`](lib/src/core/config/app_config.dart) and provide Firebase configuration plus your AI backend.

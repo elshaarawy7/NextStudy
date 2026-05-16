@@ -1,0 +1,32 @@
+﻿name: nex_study
+description: "NexStudy AI study assistant MVP."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.5
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  flutter_bloc: ^9.1.1
+  equatable: ^2.0.8
+  dio: ^5.9.2
+  firebase_core: ^4.9.0
+  firebase_auth: ^6.5.1
+  cloud_firestore: ^6.4.1
+  firebase_storage: ^13.4.1
+  file_picker: ^11.0.2
+  syncfusion_flutter_pdf: ^33.2.6
+  syncfusion_flutter_pdfviewer: ^33.2.6
+  google_fonts: ^8.1.0
+  uuid: ^4.5.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
