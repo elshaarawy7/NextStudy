@@ -32,6 +32,13 @@ class AppTheme {
         base.textTheme,
       ).apply(bodyColor: text, displayColor: text),
       dividerColor: border,
+      appBarTheme: const AppBarTheme(
+        backgroundColor: scaffold,
+        foregroundColor: text,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: true,
+      ),
       cardTheme: CardThemeData(
         elevation: 0,
         color: card,
@@ -94,11 +101,28 @@ class AppTheme {
         backgroundColor: primary,
         foregroundColor: Colors.white,
       ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: Colors.white,
+        indicatorColor: secondary,
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          final isSelected = states.contains(WidgetState.selected);
+          return TextStyle(
+            color: isSelected ? primary : muted,
+            fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
+          );
+        }),
+      ),
       tabBarTheme: const TabBarThemeData(
         labelColor: primary,
         unselectedLabelColor: muted,
         indicatorColor: primary,
         dividerColor: border,
+      ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: text,
+        contentTextStyle: GoogleFonts.cairo(color: Colors.white),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
       chipTheme: base.chipTheme.copyWith(
         backgroundColor: accent,
