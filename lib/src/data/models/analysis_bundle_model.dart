@@ -12,33 +12,45 @@ class AnalysisBundleModel extends AnalysisBundle {
   });
 
   factory AnalysisBundleModel.fromText(String text, String title) {
+    return AnalysisBundleModel.fromProcessedText(
+      text: text,
+      title: title,
+      prompt: '',
+      chunks: [text],
+    );
+  }
+
+  factory AnalysisBundleModel.fromProcessedText({
+    required String text,
+    required String title,
+    required String prompt,
+    required List<String> chunks,
+  }) {
     final sentences = text
         .replaceAll('\n', ' ')
-        .split('.')
+        .split(RegExp(r'(?<=[.!?؟:;])\s+'))
         .map((part) => part.trim())
         .where((part) => part.isNotEmpty)
         .toList();
     final core = sentences.isEmpty
-        ? [
-            'This lecture introduces important ideas that students should review carefully.',
-          ]
-        : sentences.take(8).toList();
+        ? ['المحاضرة تتناول مفاهيم دراسية مهمة تحتاج إلى مراجعة منظمة.']
+        : sentences.take(10).toList();
 
-    final keyPoints = core.take(5).map((sentence) => sentence).toList();
+    final keyPoints = core.take(5).toList();
     final steps = List.generate(
       4,
-      (index) => 'Step ${index + 1}: ${core[index % core.length]}',
+      (index) => 'الخطوة ${index + 1}: ${core[index % core.length]}',
     );
+    final quizSeed = chunks.isEmpty ? core : chunks;
     final quiz = List.generate(
-      5,
+      4,
       (index) => QuizQuestion(
-        question:
-            'What is the best description of concept ${index + 1} in $title?',
+        question: 'ما الفكرة الأساسية في الجزء ${index + 1} من محاضرة $title؟',
         options: [
-          'A quick memorization trick',
           core[index % core.length],
-          'An unrelated lecture topic',
-          'A social media definition',
+          'اسم المحاضر أو الجهة التعليمية',
+          'معلومات إدارية لا ترتبط بالمحتوى',
+          'تفصيل غير مذكور في المحاضرة',
         ],
         correctAnswer: core[index % core.length],
       ),
@@ -46,14 +58,18 @@ class AnalysisBundleModel extends AnalysisBundle {
     final flashcards = List.generate(
       5,
       (index) => Flashcard(
-        question: 'Explain idea ${index + 1} from $title.',
-        answer: core[index % core.length],
+        question: 'اشرح المفهوم ${index + 1} من محاضرة $title.',
+        answer: quizSeed[index % quizSeed.length],
       ),
     );
+    final summaryLead = core.first;
+    final promptHint = prompt.isEmpty
+        ? ''
+        : 'تم تجاهل البيانات غير التعليمية والنصوص المكررة. ';
 
     return AnalysisBundleModel(
       summary:
-          'This lecture on $title explains ${core.first.toLowerCase()} It also connects the topic to practical revision points so students can review faster.',
+          '$promptHintتشرح هذه المحاضرة بعنوان $title الفكرة التالية: $summaryLead كما تربط بين المفاهيم الأساسية والنقاط التي يحتاجها الطالب في المراجعة.',
       keyPoints: keyPoints,
       steps: steps,
       quiz: quiz,

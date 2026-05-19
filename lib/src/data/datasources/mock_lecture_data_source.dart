@@ -6,6 +6,7 @@ import 'package:uuid/uuid.dart';
 
 import '../models/analysis_bundle_model.dart';
 import '../models/lecture_model.dart';
+import '../services/pdf_text_processor.dart';
 
 class MockLectureDataSource {
   final Uuid _uuid = const Uuid();
@@ -52,13 +53,17 @@ class MockLectureDataSource {
 
     final pdfData = _extractPdfData(bytes);
     final title = file.name.replaceAll('.pdf', '').replaceAll('_', ' ');
+    final processedText = PdfTextProcessor.prepare(
+      rawText: pdfData.text,
+      lectureTitle: title,
+    );
     final lecture = LectureModel(
       id: _uuid.v4(),
       title: _toTitleCase(title),
       course: 'Uploaded lecture',
       fileName: file.name,
-      previewText: _previewOf(pdfData.text),
-      extractedText: pdfData.text,
+      previewText: processedText.previewText,
+      extractedText: processedText.cleanedText,
       uploadedAt: DateTime.now(),
       pageCount: pdfData.pageCount,
       filePath: file.path,
@@ -84,13 +89,6 @@ class MockLectureDataSource {
       );
     }
     return (text: raw, pageCount: pageCount);
-  }
-
-  String _previewOf(String text) {
-    if (text.length <= 120) {
-      return text;
-    }
-    return '${text.substring(0, 117)}...';
   }
 
   String _toTitleCase(String value) {
