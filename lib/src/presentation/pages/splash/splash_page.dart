@@ -8,7 +8,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/gradient_scaffold.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../auth/auth_page.dart';
-import '../home/home_page.dart';
+import '../shell/app_shell_page.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -35,7 +35,7 @@ class _SplashPageState extends State<SplashPage> {
   void _goNext() {
     final authState = context.read<AuthBloc>().state;
     final page = authState.status == AuthStatus.authenticated
-        ? const HomePage()
+        ? const AppShellPage()
         : const AuthPage();
 
     Navigator.of(
@@ -45,51 +45,111 @@ class _SplashPageState extends State<SplashPage> {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return GradientScaffold(
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0.7, end: 1),
-              duration: const Duration(milliseconds: 1200),
-              curve: Curves.easeOutBack,
-              builder: (context, value, child) =>
-                  Transform.scale(scale: value, child: child),
-              child: Container(
-                height: 96,
-                width: 96,
-                decoration: BoxDecoration(
-                  gradient: AppTheme.heroGradient(),
-                  borderRadius: BorderRadius.circular(28),
-                  boxShadow: AppTheme.softShadow(),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 28),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.92, end: 1),
+                duration: const Duration(milliseconds: 1000),
+                curve: Curves.easeOut,
+                builder: (context, value, child) => Opacity(
+                  opacity: value,
+                  child: Transform.scale(scale: value, child: child),
                 ),
-                child: const Icon(
-                  Icons.auto_awesome_rounded,
-                  color: Colors.white,
-                  size: 42,
+                child: Container(
+                  height: 118,
+                  width: 118,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.88),
+                    borderRadius: BorderRadius.circular(34),
+                    boxShadow: AppTheme.softShadow(),
+                    border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.7),
+                    ),
+                  ),
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Container(
+                        height: 68,
+                        width: 68,
+                        decoration: BoxDecoration(
+                          gradient: AppTheme.heroGradient(),
+                          borderRadius: BorderRadius.circular(22),
+                        ),
+                      ),
+                      const Icon(
+                        Icons.menu_book_rounded,
+                        color: Colors.white,
+                        size: 32,
+                      ),
+                      Positioned(
+                        top: 26,
+                        right: 24,
+                        child: Container(
+                          height: 14,
+                          width: 14,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppTheme.accent.withValues(alpha: 0.20),
+                                blurRadius: 10,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 28),
-            Text(
-              AppConfig.appName,
-              style: Theme.of(
-                context,
-              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40),
-              child: Text(
+              const SizedBox(height: 26),
+              Text(
+                AppConfig.appName,
+                style: textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 0.2,
+                ),
+              ),
+              const SizedBox(height: 10),
+              Text(
                 AppConfig.studyGreeting,
                 textAlign: TextAlign.center,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodyLarge?.copyWith(color: AppTheme.muted),
+                textDirection: TextDirection.rtl,
+                style: textTheme.titleMedium?.copyWith(
+                  color: AppTheme.muted,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-          ],
+              const SizedBox(height: 28),
+              Container(
+                width: 120,
+                height: 6,
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.72),
+                  borderRadius: BorderRadius.circular(999),
+                ),
+                child: Align(
+                  alignment: Alignment.centerRight,
+                  child: Container(
+                    width: 54,
+                    decoration: BoxDecoration(
+                      gradient: AppTheme.heroGradient(),
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

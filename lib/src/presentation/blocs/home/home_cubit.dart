@@ -30,4 +30,11 @@ class HomeCubit extends Cubit<HomeState> {
     final updated = [lecture, ...state.lectures];
     emit(state.copyWith(status: HomeStatus.loaded, lectures: updated));
   }
+
+  void replaceLecture(Lecture lecture) {
+    final updated = state.lectures
+        .map((item) => item.id == lecture.id ? lecture : item)
+        .toList();
+    emit(state.copyWith(status: HomeStatus.loaded, lectures: updated));
+  }
 }

@@ -20,17 +20,7 @@ class GradientScaffold extends StatelessWidget {
       floatingActionButton: floatingActionButton,
       bottomNavigationBar: bottomNavigationBar,
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [
-              AppTheme.primary.withValues(alpha: 0.12),
-              AppTheme.secondary.withValues(alpha: 0.08),
-              Colors.white,
-            ],
-          ),
-        ),
+        decoration: BoxDecoration(color: AppTheme.scaffold),
         child: SafeArea(child: body),
       ),
     );

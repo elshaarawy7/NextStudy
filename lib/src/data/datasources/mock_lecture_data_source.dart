@@ -20,6 +20,7 @@ class MockLectureDataSource {
       extractedText:
           'Cellular respiration is the process cells use to convert glucose into ATP. Glycolysis happens in the cytoplasm. The Krebs cycle continues energy extraction. The electron transport chain produces most ATP.',
       uploadedAt: DateTime.now().subtract(const Duration(hours: 10)),
+      pageCount: 12,
       analysis: AnalysisBundleModel.fromText(
         'Cellular respiration is the process cells use to convert glucose into ATP. Glycolysis happens in the cytoplasm. The Krebs cycle continues energy extraction. The electron transport chain produces most ATP.',
         'Cellular Respiration',
@@ -49,16 +50,17 @@ class MockLectureDataSource {
       throw Exception('Unable to read the selected PDF file.');
     }
 
-    final extractedText = _extractPdfText(bytes);
+    final pdfData = _extractPdfData(bytes);
     final title = file.name.replaceAll('.pdf', '').replaceAll('_', ' ');
     final lecture = LectureModel(
       id: _uuid.v4(),
       title: _toTitleCase(title),
       course: 'Uploaded lecture',
       fileName: file.name,
-      previewText: _previewOf(extractedText),
-      extractedText: extractedText,
+      previewText: _previewOf(pdfData.text),
+      extractedText: pdfData.text,
       uploadedAt: DateTime.now(),
+      pageCount: pdfData.pageCount,
       filePath: file.path,
     );
 
@@ -66,17 +68,22 @@ class MockLectureDataSource {
     return lecture;
   }
 
-  String _extractPdfText(Uint8List bytes) {
+  ({String text, int pageCount}) _extractPdfData(Uint8List bytes) {
     final document = PdfDocument(inputBytes: bytes);
+    final pageCount = document.pages.count;
     final extractor = PdfTextExtractor(document);
     final buffer = StringBuffer(extractor.extractText());
     document.dispose();
 
     final raw = buffer.toString().replaceAll(RegExp(r'\s+'), ' ').trim();
     if (raw.isEmpty) {
-      return 'This PDF was uploaded successfully, but no extractable text was found. Use OCR-ready lecture notes for richer AI support.';
+      return (
+        text:
+            'This PDF was uploaded successfully, but no extractable text was found. Use OCR-ready lecture notes for richer AI support.',
+        pageCount: pageCount,
+      );
     }
-    return raw;
+    return (text: raw, pageCount: pageCount);
   }
 
   String _previewOf(String text) {

@@ -5,7 +5,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/gradient_scaffold.dart';
 import '../../blocs/auth/auth_bloc.dart';
 import '../../widgets/section_card.dart';
-import '../home/home_page.dart';
+import '../shell/app_shell_page.dart';
 
 class AuthPage extends StatefulWidget {
   const AuthPage({super.key});
@@ -44,11 +44,13 @@ class _AuthPageState extends State<AuthPage> {
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) {
         if (state.status == AuthStatus.authenticated) {
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(builder: (_) => const HomePage()),
+            MaterialPageRoute(builder: (_) => const AppShellPage()),
           );
         }
         if (state.errorMessage != null && state.status == AuthStatus.failure) {
@@ -67,33 +69,31 @@ class _AuthPageState extends State<AuthPage> {
                 children: [
                   const SizedBox(height: 32),
                   Container(
-                    height: 64,
-                    width: 64,
+                    height: 68,
+                    width: 68,
                     decoration: BoxDecoration(
-                      gradient: AppTheme.heroGradient(),
+                      color: AppTheme.secondary,
                       borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: AppTheme.border),
                     ),
                     child: const Icon(
                       Icons.school_rounded,
-                      color: Colors.white,
+                      color: AppTheme.primary,
                       size: 30,
                     ),
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    state.isLogin
-                        ? 'Welcome back to smarter studying'
-                        : 'Create your study copilot',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                      fontWeight: FontWeight.w700,
+                    state.isLogin ? 'تسجيل دخول الطالب' : 'إنشاء حساب جديد',
+                    style: textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
                     ),
                   ),
                   const SizedBox(height: 10),
                   Text(
-                    'Upload lectures, generate clear notes, and review faster with AI study flows.',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.bodyLarge?.copyWith(color: AppTheme.muted),
+                    'واجهة بسيطة لمتابعة المحاضرات ورفع الملفات والمذاكرة بشكل أسرع.',
+                    textDirection: TextDirection.rtl,
+                    style: textTheme.bodyLarge?.copyWith(color: AppTheme.muted),
                   ),
                   const SizedBox(height: 28),
                   SectionCard(
@@ -106,10 +106,11 @@ class _AuthPageState extends State<AuthPage> {
                               controller: _nameController,
                               validator: (value) =>
                                   value == null || value.isEmpty
-                                  ? 'Enter your name'
+                                  ? 'اكتب الاسم'
                                   : null,
+                              textDirection: TextDirection.rtl,
                               decoration: const InputDecoration(
-                                hintText: 'Full name',
+                                hintText: 'الاسم الكامل',
                               ),
                             ),
                             const SizedBox(height: 14),
@@ -119,10 +120,10 @@ class _AuthPageState extends State<AuthPage> {
                             keyboardType: TextInputType.emailAddress,
                             validator: (value) =>
                                 value == null || !value.contains('@')
-                                ? 'Enter a valid email'
+                                ? 'اكتب بريدًا صحيحًا'
                                 : null,
                             decoration: const InputDecoration(
-                              hintText: 'Email address',
+                              hintText: 'البريد الإلكتروني',
                             ),
                           ),
                           const SizedBox(height: 14),
@@ -131,10 +132,10 @@ class _AuthPageState extends State<AuthPage> {
                             obscureText: true,
                             validator: (value) =>
                                 value == null || value.length < 6
-                                ? 'Use at least 6 characters'
+                                ? 'كلمة المرور 6 أحرف على الأقل'
                                 : null,
                             decoration: const InputDecoration(
-                              hintText: 'Password',
+                              hintText: 'كلمة المرور',
                             ),
                           ),
                           const SizedBox(height: 18),
@@ -146,10 +147,10 @@ class _AuthPageState extends State<AuthPage> {
                                   : () => _submit(context, state.isLogin),
                               child: Text(
                                 state.status == AuthStatus.loading
-                                    ? 'Please wait...'
+                                    ? 'جاري التحميل...'
                                     : state.isLogin
-                                    ? 'Login'
-                                    : 'Create account',
+                                    ? 'تسجيل الدخول'
+                                    : 'إنشاء الحساب',
                               ),
                             ),
                           ),
@@ -159,15 +160,15 @@ class _AuthPageState extends State<AuthPage> {
                             children: [
                               Text(
                                 state.isLogin
-                                    ? 'New to NexStudy?'
-                                    : 'Already have an account?',
+                                    ? 'ليس لديك حساب؟'
+                                    : 'لديك حساب بالفعل؟',
                               ),
                               TextButton(
                                 onPressed: () => context.read<AuthBloc>().add(
                                   AuthModeChanged(!state.isLogin),
                                 ),
                                 child: Text(
-                                  state.isLogin ? 'Register' : 'Login',
+                                  state.isLogin ? 'إنشاء حساب' : 'تسجيل الدخول',
                                 ),
                               ),
                             ],

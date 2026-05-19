@@ -9,9 +9,11 @@ import '../../../core/widgets/gradient_scaffold.dart';
 import '../../../domain/entities/lecture.dart';
 import '../../blocs/analysis/analysis_cubit.dart';
 import '../../blocs/analysis/analysis_state.dart';
-import '../../blocs/chat/chat_cubit.dart';
-import '../../blocs/chat/chat_state.dart';
+import '../../blocs/home/home_cubit.dart';
 import '../../widgets/section_card.dart';
+import '../chat/chat_page.dart';
+import '../flashcards/flashcards_page.dart';
+import '../quiz/quiz_page.dart';
 
 class AnalysisPage extends StatefulWidget {
   const AnalysisPage({super.key, required this.lecture});
@@ -29,7 +31,6 @@ class _AnalysisPageState extends State<AnalysisPage> {
   void initState() {
     super.initState();
     context.read<AnalysisCubit>().loadAnalysis(widget.lecture);
-    context.read<ChatCubit>().reset();
   }
 
   @override
@@ -41,96 +42,134 @@ class _AnalysisPageState extends State<AnalysisPage> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 6,
+      length: 3,
       child: GradientScaffold(
-        body: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-              child: Row(
-                children: [
-                  IconButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.arrow_back_rounded),
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          widget.lecture.title,
-                          style: Theme.of(context).textTheme.titleLarge
-                              ?.copyWith(fontWeight: FontWeight.w700),
-                        ),
-                        Text(
-                          widget.lecture.fileName,
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: AppTheme.muted),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const TabBar(
-              isScrollable: true,
-              tabs: [
-                Tab(text: 'Summary'),
-                Tab(text: 'Key Points'),
-                Tab(text: 'Steps'),
-                Tab(text: 'Quiz'),
-                Tab(text: 'Flashcards'),
-                Tab(text: 'Chat'),
-              ],
-            ),
-            Expanded(
-              child: BlocBuilder<AnalysisCubit, AnalysisState>(
-                builder: (context, state) {
-                  if (state.status == AnalysisStatus.loading) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
+        body: BlocConsumer<AnalysisCubit, AnalysisState>(
+          listener: (context, state) {
+            final analysis = state.analysis;
+            if (state.status == AnalysisStatus.loaded && analysis != null) {
+              context.read<HomeCubit>().replaceLecture(
+                widget.lecture.copyWith(analysis: analysis),
+              );
+            }
+          },
+          builder: (context, state) {
+            if (state.status == AnalysisStatus.loading) {
+              return const _AnalysisLoadingView();
+            }
 
-                  if (state.status == AnalysisStatus.failure) {
-                    return Center(
-                      child: Padding(
-                        padding: const EdgeInsets.all(24),
-                        child: Text(state.errorMessage ?? 'Analysis failed.'),
+            if (state.status == AnalysisStatus.failure) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Text(
+                    state.errorMessage ?? 'تعذر تحليل المحاضرة.',
+                    textDirection: TextDirection.rtl,
+                  ),
+                ),
+              );
+            }
+
+            final analysis = state.analysis ?? widget.lecture.analysis;
+            if (analysis == null) {
+              return const Center(
+                child: Text('لا يوجد محتوى متاح لهذه المحاضرة.'),
+              );
+            }
+
+            final lectureWithAnalysis = widget.lecture.copyWith(
+              analysis: analysis,
+            );
+
+            return Column(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.arrow_back_rounded),
                       ),
-                    );
-                  }
-
-                  final analysis = state.analysis ?? widget.lecture.analysis;
-                  if (analysis == null) {
-                    return const Center(child: Text('No analysis available.'));
-                  }
-
-                  return TabBarView(
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              widget.lecture.title,
+                              style: Theme.of(context).textTheme.titleLarge
+                                  ?.copyWith(fontWeight: FontWeight.w700),
+                            ),
+                            Text(
+                              widget.lecture.fileName,
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(color: AppTheme.muted),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: _StudyActionsRow(
+                    onQuizTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              QuizPage(lecture: lectureWithAnalysis),
+                        ),
+                      );
+                    },
+                    onFlashcardsTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              FlashcardsPage(lecture: lectureWithAnalysis),
+                        ),
+                      );
+                    },
+                    onChatTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              ChatPage(lecture: lectureWithAnalysis),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const TabBar(
+                  isScrollable: true,
+                  tabs: [
+                    Tab(text: 'الملخص'),
+                    Tab(text: 'النقاط'),
+                    Tab(text: 'الشرح'),
+                  ],
+                ),
+                Expanded(
+                  child: TabBarView(
                     children: [
                       _SummaryTab(
-                        lecture: widget.lecture,
+                        lecture: lectureWithAnalysis,
                         summary: analysis.summary,
                       ),
                       _BulletsTab(
-                        title: 'Key learning points',
+                        title: 'النقاط الأساسية',
                         items: analysis.keyPoints,
                       ),
                       _BulletsTab(
-                        title: 'Step-by-step explanation',
+                        title: 'شرح مبسط خطوة بخطوة',
                         items: analysis.steps,
                       ),
-                      _QuizTab(lecture: widget.lecture, state: state),
-                      _FlashcardsTab(lecture: widget.lecture, state: state),
-                      _ChatTab(
-                        lecture: widget.lecture,
-                        controller: _chatController,
-                      ),
                     ],
-                  );
-                },
-              ),
-            ),
-          ],
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -169,7 +208,7 @@ class _SummaryTab extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Simple summary',
+                'ملخص مبسط',
                 style: Theme.of(
                   context,
                 ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
@@ -235,247 +274,127 @@ class _BulletsTab extends StatelessWidget {
   }
 }
 
-class _QuizTab extends StatelessWidget {
-  const _QuizTab({required this.lecture, required this.state});
+class _StudyActionsRow extends StatelessWidget {
+  const _StudyActionsRow({
+    required this.onQuizTap,
+    required this.onFlashcardsTap,
+    required this.onChatTap,
+  });
 
-  final Lecture lecture;
-  final AnalysisState state;
+  final VoidCallback onQuizTap;
+  final VoidCallback onFlashcardsTap;
+  final VoidCallback onChatTap;
 
   @override
   Widget build(BuildContext context) {
-    final quiz = state.analysis?.quiz ?? lecture.analysis?.quiz ?? [];
-    return ListView(
-      padding: const EdgeInsets.all(20),
-      children: quiz
-          .map(
-            (question) => Padding(
-              padding: const EdgeInsets.only(bottom: 16),
-              child: SectionCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      question.question,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    ...question.options.map(
-                      (option) => Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: Container(
-                          padding: const EdgeInsets.all(14),
-                          decoration: BoxDecoration(
-                            color: option == question.correctAnswer
-                                ? AppTheme.primary.withValues(alpha: 0.08)
-                                : const Color(0xFFF7F8FD),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Row(
-                            children: [
-                              Expanded(child: Text(option)),
-                              if (option == question.correctAnswer)
-                                const Icon(
-                                  Icons.check_circle_rounded,
-                                  color: AppTheme.primary,
-                                ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          )
-          .toList(),
+    return Row(
+      children: [
+        Expanded(
+          child: _ActionButton(
+            icon: Icons.quiz_outlined,
+            label: 'الاختبار',
+            onTap: onQuizTap,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: _ActionButton(
+            icon: Icons.style_outlined,
+            label: 'البطاقات',
+            onTap: onFlashcardsTap,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: _ActionButton(
+            icon: Icons.chat_bubble_outline_rounded,
+            label: 'الدردشة',
+            onTap: onChatTap,
+          ),
+        ),
+      ],
     );
   }
 }
 
-class _FlashcardsTab extends StatefulWidget {
-  const _FlashcardsTab({required this.lecture, required this.state});
+class _ActionButton extends StatelessWidget {
+  const _ActionButton({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
 
-  final Lecture lecture;
-  final AnalysisState state;
-
-  @override
-  State<_FlashcardsTab> createState() => _FlashcardsTabState();
-}
-
-class _FlashcardsTabState extends State<_FlashcardsTab> {
-  int index = 0;
-  bool showAnswer = false;
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final flashcards =
-        widget.state.analysis?.flashcards ??
-        widget.lecture.analysis?.flashcards ??
-        [];
-
-    if (flashcards.isEmpty) {
-      return const Center(child: Text('No flashcards available.'));
-    }
-
-    final card = flashcards[index];
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        children: [
-          Expanded(
-            child: GestureDetector(
-              onTap: () => setState(() => showAnswer = !showAnswer),
-              child: SectionCard(
-                child: Center(
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 300),
-                    child: Text(
-                      showAnswer ? card.answer : card.question,
-                      key: ValueKey(showAnswer),
-                      textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.headlineSmall
-                          ?.copyWith(fontWeight: FontWeight.w700),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            showAnswer
-                ? 'Tap card to see question'
-                : 'Tap card to reveal answer',
-          ),
-          const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: index == 0
-                      ? null
-                      : () => setState(() {
-                          index--;
-                          showAnswer = false;
-                        }),
-                  child: const Text('Previous'),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: ElevatedButton(
-                  onPressed: index == flashcards.length - 1
-                      ? null
-                      : () => setState(() {
-                          index++;
-                          showAnswer = false;
-                        }),
-                  child: const Text('Next'),
-                ),
-              ),
-            ],
-          ),
-        ],
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(18),
+      child: Ink(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: AppTheme.border),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: AppTheme.primary),
+            const SizedBox(height: 8),
+            Text(label),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _ChatTab extends StatelessWidget {
-  const _ChatTab({required this.lecture, required this.controller});
-
-  final Lecture lecture;
-  final TextEditingController controller;
+class _AnalysisLoadingView extends StatelessWidget {
+  const _AnalysisLoadingView();
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        children: [
-          Expanded(
-            child: BlocBuilder<ChatCubit, ChatState>(
-              builder: (context, state) {
-                return ListView.separated(
-                  itemCount: state.messages.length,
-                  separatorBuilder: (context, index) =>
-                      const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final message = state.messages[index];
-                    return Align(
-                      alignment: message.isUser
-                          ? Alignment.centerRight
-                          : Alignment.centerLeft,
-                      child: Container(
-                        constraints: const BoxConstraints(maxWidth: 320),
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: message.isUser
-                              ? AppTheme.primary
-                              : Colors.white,
-                          borderRadius: BorderRadius.circular(20),
-                          boxShadow: message.isUser
-                              ? null
-                              : AppTheme.softShadow(),
-                        ),
-                        child: Text(
-                          message.text,
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(
-                                color: message.isUser
-                                    ? Colors.white
-                                    : AppTheme.text,
-                              ),
-                        ),
-                      ),
-                    );
-                  },
-                );
-              },
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              height: 84,
+              width: 84,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(color: AppTheme.border),
+                boxShadow: AppTheme.softShadow(),
+              ),
+              child: const Padding(
+                padding: EdgeInsets.all(22),
+                child: CircularProgressIndicator(strokeWidth: 3),
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: TextField(
-                  controller: controller,
-                  minLines: 1,
-                  maxLines: 3,
-                  decoration: const InputDecoration(
-                    hintText: 'Ask a question from this lecture',
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              BlocBuilder<ChatCubit, ChatState>(
-                builder: (context, state) {
-                  return ElevatedButton(
-                    onPressed: state.status == ChatStatus.sending
-                        ? null
-                        : () {
-                            final value = controller.text.trim();
-                            if (value.isEmpty) {
-                              return;
-                            }
-                            context.read<ChatCubit>().sendMessage(
-                              lecture: lecture,
-                              message: value,
-                            );
-                            controller.clear();
-                          },
-                    child: Text(
-                      state.status == ChatStatus.sending ? '...' : 'Send',
-                    ),
-                  );
-                },
-              ),
-            ],
-          ),
-        ],
+            const SizedBox(height: 18),
+            Text(
+              'جاري تحليل المحاضرة...',
+              textDirection: TextDirection.rtl,
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'نجهز لك الملخص والأسئلة والبطاقات الدراسية.',
+              textDirection: TextDirection.rtl,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppTheme.muted),
+            ),
+          ],
+        ),
       ),
     );
   }

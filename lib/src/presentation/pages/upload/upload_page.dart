@@ -25,6 +25,8 @@ class UploadPage extends StatelessWidget {
         }
       },
       builder: (context, state) {
+        final textTheme = Theme.of(context).textTheme;
+
         return GradientScaffold(
           body: Padding(
             padding: const EdgeInsets.all(24),
@@ -37,50 +39,77 @@ class UploadPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  'Upload a lecture PDF',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    fontWeight: FontWeight.w700,
+                  'رفع محاضرة',
+                  style: textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  'Pick a lecture note, handout, or slide export. NexStudy will extract the text and prepare revision content.',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.bodyLarge?.copyWith(color: AppTheme.muted),
+                  'اختر ملف PDF للمحاضرة ليتم تجهيز ملخص ومحتوى مراجعة بشكل منظم وواضح.',
+                  textDirection: TextDirection.rtl,
+                  style: textTheme.bodyLarge?.copyWith(color: AppTheme.muted),
                 ),
                 const SizedBox(height: 24),
                 Expanded(
                   child: SectionCard(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Container(
-                          height: 94,
-                          width: 94,
+                          height: 72,
+                          width: 72,
                           decoration: BoxDecoration(
-                            gradient: AppTheme.heroGradient(),
-                            borderRadius: BorderRadius.circular(30),
+                            color: AppTheme.secondary,
+                            borderRadius: BorderRadius.circular(22),
+                            border: Border.all(color: AppTheme.border),
                           ),
                           child: const Icon(
                             Icons.cloud_upload_rounded,
-                            color: Colors.white,
-                            size: 42,
+                            color: AppTheme.primary,
+                            size: 34,
                           ),
                         ),
                         const SizedBox(height: 22),
                         Text(
-                          'Drop in your lecture and let AI do the heavy lifting.',
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(fontWeight: FontWeight.w700),
+                          'ارفع الملف وابدأ المذاكرة',
+                          textDirection: TextDirection.rtl,
+                          style: textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'You will get a summary, key points, steps, quiz, flashcards, and a lecture chat in one flow.',
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(color: AppTheme.muted),
+                          'سيتم إعداد ملخص ونقاط أساسية وأسئلة مراجعة بطريقة عملية مناسبة للطلاب.',
+                          textDirection: TextDirection.rtl,
+                          style: textTheme.bodyMedium?.copyWith(
+                            color: AppTheme.muted,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: AppTheme.accent,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: AppTheme.border),
+                          ),
+                          child: const Row(
+                            children: [
+                              Icon(
+                                Icons.picture_as_pdf_rounded,
+                                color: AppTheme.primary,
+                              ),
+                              SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  'PDF فقط - مناسب للمحاضرات والملخصات والسلايدات',
+                                  textDirection: TextDirection.rtl,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                         const Spacer(),
                         SizedBox(
@@ -94,8 +123,8 @@ class UploadPage extends StatelessWidget {
                             icon: const Icon(Icons.attach_file_rounded),
                             label: Text(
                               state.status == UploadStatus.loading
-                                  ? 'Uploading...'
-                                  : 'Choose PDF',
+                                  ? 'جاري الرفع...'
+                                  : 'اختيار ملف PDF',
                             ),
                           ),
                         ),

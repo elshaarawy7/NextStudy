@@ -6,6 +6,5 @@ class AppConfig {
   static const appName = 'NexStudy';
   static const aiMode = AiProviderMode.mock;
   static const useFirebase = false;
-  static const studyGreeting =
-      'Learn faster with simple notes, focused quizzes, and calm AI help.';
+  static const studyGreeting = 'ذاكر محاضراتك بسهولة';
 }

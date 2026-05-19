@@ -75,6 +75,8 @@ class NexStudyApp extends StatelessWidget {
           title: 'NexStudy',
           debugShowCheckedModeBanner: false,
           theme: AppTheme.light(),
+          builder: (context, child) =>
+              Directionality(textDirection: TextDirection.rtl, child: child!),
           home: const SplashPage(),
         ),
       ),

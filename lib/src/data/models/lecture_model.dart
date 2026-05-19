@@ -10,6 +10,7 @@ class LectureModel extends Lecture {
     required super.previewText,
     required super.extractedText,
     required super.uploadedAt,
+    required super.pageCount,
     super.filePath,
     super.analysis,
   });
@@ -23,6 +24,7 @@ class LectureModel extends Lecture {
       previewText: previewText,
       extractedText: extractedText,
       uploadedAt: uploadedAt,
+      pageCount: pageCount,
       filePath: filePath,
       analysis: analysis,
     );

@@ -11,6 +11,7 @@ class Lecture extends Equatable {
     required this.previewText,
     required this.extractedText,
     required this.uploadedAt,
+    required this.pageCount,
     this.filePath,
     this.analysis,
   });
@@ -22,6 +23,7 @@ class Lecture extends Equatable {
   final String previewText;
   final String extractedText;
   final DateTime uploadedAt;
+  final int pageCount;
   final String? filePath;
   final AnalysisBundle? analysis;
 
@@ -33,6 +35,7 @@ class Lecture extends Equatable {
     String? previewText,
     String? extractedText,
     DateTime? uploadedAt,
+    int? pageCount,
     String? filePath,
     AnalysisBundle? analysis,
   }) {
@@ -44,6 +47,7 @@ class Lecture extends Equatable {
       previewText: previewText ?? this.previewText,
       extractedText: extractedText ?? this.extractedText,
       uploadedAt: uploadedAt ?? this.uploadedAt,
+      pageCount: pageCount ?? this.pageCount,
       filePath: filePath ?? this.filePath,
       analysis: analysis ?? this.analysis,
     );
@@ -58,6 +62,7 @@ class Lecture extends Equatable {
     previewText,
     extractedText,
     uploadedAt,
+    pageCount,
     filePath,
     analysis,
   ];
